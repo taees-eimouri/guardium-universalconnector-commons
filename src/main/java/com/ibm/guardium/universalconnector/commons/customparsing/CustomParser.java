@@ -1,5 +1,6 @@
 package com.ibm.guardium.universalconnector.commons.customparsing;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ibm.guardium.universalconnector.commons.customparsing.regex.RegexExecutor;
 import com.ibm.guardium.universalconnector.commons.customparsing.regex.RegexResult;
 import com.ibm.guardium.universalconnector.commons.structures.Accessor;
@@ -9,6 +10,10 @@ import org.apache.commons.validator.routines.InetAddressValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,10 +21,11 @@ import java.util.regex.Pattern;
 import static com.ibm.guardium.universalconnector.commons.customparsing.PropertyConstant.*;
 
 public abstract class CustomParser {
-    private static final Logger logger = LogManager.getLogger(RegexExecutor.class);
+    private static final Logger logger = LogManager.getLogger(CustomParser.class);
     private static final RegexExecutor executor = new RegexExecutor();
     static InetAddressValidator inetAddressValidator = InetAddressValidator.getInstance();
     protected Map<String, String> properties;
+    ObjectMapper mapper;
 
     public CustomParser() {
     }
@@ -118,5 +124,10 @@ public abstract class CustomParser {
     }
 
     public abstract Map<String, String> getProperties();
+
+    protected HashMap<String, String> readJsonFileAsJson(String fileName) throws IOException {
+        String content = new String(Files.readAllBytes(Paths.get(fileName)));
+        return (HashMap<String, String>)(new ObjectMapper()).readValue(content, HashMap.class);
+    }
 
 }

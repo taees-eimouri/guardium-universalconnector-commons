@@ -1,0 +1,11 @@
+{
+  "session_id": "(?<=\\[Session ID: )\\d+(?=\\])",
+  "client_port": "(?<=\\[Client Port: )\\d+(?=\\])",
+  "server_port": "(?<=\\[Server Port: )\\d+(?=\\])",
+  "db_user": "(?<=\\[DB User: )\\w+(?=\\])",
+  "server_type": "(?<=\\[Server Type: )\\w+(?=\\])",
+  "db_protocol": "(?<=\\[DB Protocol: )[\\w/]+(?=\\])",
+  "exception_type_id": "(?<=\\[Exception Type ID: )\\d+(?=\\])",
+  "db_name": "(?<=\\[DB Name: )\\w+(?=\\])",
+  "client_ip": "(?<=\\[Client IP: )\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(?=\\])"
+}
