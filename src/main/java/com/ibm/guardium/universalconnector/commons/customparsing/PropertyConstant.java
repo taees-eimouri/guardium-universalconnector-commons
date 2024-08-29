@@ -5,6 +5,7 @@ public class PropertyConstant {
     public static final String SESSION_ID = "session_id";
     public static final String DB_NAME = "db_name";
     public static final String CLIENT_PORT = "client_port";
+    public static final String CLIENT_OS = "client_os";
     public static final String SERVER_PORT = "server_port";
     public static final String DB_USER = "db_user";
     public static final String SERVER_TYPE = "server_type";

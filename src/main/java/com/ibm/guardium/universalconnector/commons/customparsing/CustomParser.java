@@ -48,17 +48,29 @@ public abstract class CustomParser {
         if (properties.get(CALLER_IP) != null)
             record.setSessionLocator(parseSessionLocator(parse(payload, properties.get(CALLER_IP))));
 
-        record.setAccessor(parseAccessor("type", "hostname", "protocol", "serviceName", "appUserName"));
+        setAccessor(record, payload);
 
         return record;
     }
 
     protected void setSessionId(Record record, String payload) {
-        String sessionId = parse(payload, properties.get(SESSION_ID));
-        if (sessionId != null)
-            record.setSessionId(sessionId);
+        String value = getValue(payload, SESSION_ID);
+        if (value != null)
+            record.setSessionId(value);
         else
             record.setSessionId(DEFAULT_STRING);
+    }
+
+    protected String getClientOs(String payload) {
+        String val = getValue(payload, CLIENT_OS);
+        if (val != null)
+            return val;
+
+        return DEFAULT_STRING;
+    }
+
+    protected String getValue(String payload, String fieldName) {
+        return parse(payload, properties.get(fieldName));
     }
 
     protected String parse(String payload, String regexString) {
@@ -82,20 +94,20 @@ public abstract class CustomParser {
         }
     }
 
-    protected Accessor parseAccessor(String serviceType, String hostname, String protocol, String serviceName, String appUserName) {
+    protected void setAccessor(Record record, String payload) {
         Accessor accessor = new Accessor();
 
-        accessor.setServerType(serviceType);
+        //accessor.setServerType(getValue());
         accessor.setServerOs(UNKOWN_STRING);
 
-        accessor.setClientOs(UNKOWN_STRING);
+        accessor.setClientOs(getClientOs(payload));
         accessor.setClientHostName(UNKOWN_STRING);
 
-        accessor.setServerHostName(hostname);
+        //accessor.setServerHostName(hostname);
 
         accessor.setCommProtocol(UNKOWN_STRING);
 
-        accessor.setDbProtocol(protocol);
+        //accessor.setDbProtocol(protocol);
         accessor.setDbProtocolVersion(UNKOWN_STRING);
 
         accessor.setOsUser(UNKOWN_STRING);
@@ -107,9 +119,10 @@ public abstract class CustomParser {
         accessor.setLanguage(Accessor.LANGUAGE_FREE_TEXT_STRING);
         accessor.setDataType(Accessor.DATA_TYPE_GUARDIUM_SHOULD_NOT_PARSE_SQL);
 
-        accessor.setDbUser(appUserName);
-        accessor.setServiceName(serviceName);
-        return accessor;
+        //accessor.setDbUser(appUserName);
+        //accessor.setServiceName(serviceName);
+
+        record.setAccessor(accessor);
     }
 
     SessionLocator parseSessionLocator(String callerIp) {
