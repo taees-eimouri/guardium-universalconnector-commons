@@ -1,6 +1,7 @@
 package com.ibm.guardium.universalconnector.commons.customparsing;
 
 public class PropertyConstant {
+    public static final String DEFAULT_STRING = "";
     public static final String SESSION_ID = "session_id";
     public static final String DB_NAME = "db_name";
     public static final String CLIENT_PORT = "client_port";

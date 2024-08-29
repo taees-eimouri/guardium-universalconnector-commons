@@ -39,8 +39,8 @@ public abstract class CustomParser {
 
     private Record extractRecord(String payload) {
         Record record = new Record();
-        if (properties.get(SESSION_ID) != null)
-            record.setSessionId(parse(payload, properties.get(SESSION_ID)));
+
+        setSessionId(record, payload);
 
         if (properties.get(DB_NAME) != null)
             record.setDbName(parse(payload, properties.get(DB_NAME)));
@@ -51,6 +51,14 @@ public abstract class CustomParser {
         record.setAccessor(parseAccessor("type", "hostname", "protocol", "serviceName", "appUserName"));
 
         return record;
+    }
+
+    protected void setSessionId(Record record, String payload) {
+        String sessionId = parse(payload, properties.get(SESSION_ID));
+        if ( sessionId != null)
+            record.setSessionId(sessionId);
+        else
+            record.setSessionId(DEFAULT_STRING);
     }
 
     String parse(String payload, String regexString) {
