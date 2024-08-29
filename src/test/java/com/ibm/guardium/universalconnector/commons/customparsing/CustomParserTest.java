@@ -3,17 +3,11 @@ package com.ibm.guardium.universalconnector.commons.customparsing;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 public class CustomParserTest {
     CustomParser parser = new CustomParser() {
         @Override
-        public Map<String, String> getProperties() {
-            Map<String, String> map = new HashMap<>();
-            map.put("session_id", "(?<=\\[Session ID: )\\d+(?=\\])");
-            return map;
+        public String getConfigFilePath() {
+            return "src/test/java/resources/config.json";
         }
     };
 
@@ -34,12 +28,6 @@ public class CustomParserTest {
         String record = parser.parse(payload, "(\\w+)\\s");
 
         Assert.assertNotNull(record);
-    }
-
-    @Test
-    public void testFile() throws IOException {
-        HashMap<String, String> map = parser.readJsonFileAsJson("src/test/java/resources/config.json");
-        Assert.assertNotNull(map);
     }
 
 }

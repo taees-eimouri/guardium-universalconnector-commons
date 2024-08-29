@@ -25,9 +25,9 @@ public abstract class CustomParser {
     private static final Logger logger = LogManager.getLogger(CustomParser.class);
     protected static InetAddressValidator inetAddressValidator = InetAddressValidator.getInstance();
     protected Map<String, String> properties;
-    ObjectMapper mapper;
+    ObjectMapper mapper = new ObjectMapper();
 
-    CustomParser() {
+    public CustomParser() {
     }
 
     public Record parseRecord(String payload) {
@@ -131,11 +131,16 @@ public abstract class CustomParser {
         return sessionLocator;
     }
 
-    public abstract Map<String, String> getProperties();
+    public abstract String getConfigFilePath();
 
-    protected HashMap<String, String> readJsonFileAsJson(String fileName) throws IOException {
-        String content = new String(Files.readAllBytes(Paths.get(fileName)));
-        return (HashMap<String, String>) (new ObjectMapper()).readValue(content, HashMap.class);
+
+    public Map<String, String> getProperties() {
+        try {
+            String content = new String(Files.readAllBytes(Paths.get(getConfigFilePath())));
+            return (HashMap<String, String>) mapper.readValue(content, HashMap.class);
+        } catch (IOException e) {
+            return null;
+        }
     }
 
 }
