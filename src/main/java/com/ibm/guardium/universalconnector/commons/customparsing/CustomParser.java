@@ -61,7 +61,7 @@ public abstract class CustomParser {
             record.setSessionId(DEFAULT_STRING);
     }
 
-    String parse(String payload, String regexString) {
+    protected String parse(String payload, String regexString) {
         Pattern pattern = Pattern.compile(regexString);
         RegexResult rr = executor.find(pattern, payload);
         if (rr.matched()) {
@@ -82,7 +82,7 @@ public abstract class CustomParser {
         }
     }
 
-    Accessor parseAccessor(String serviceType, String hostname, String protocol, String serviceName, String appUserName) {
+    protected Accessor parseAccessor(String serviceType, String hostname, String protocol, String serviceName, String appUserName) {
         Accessor accessor = new Accessor();
 
         accessor.setServerType(serviceType);
