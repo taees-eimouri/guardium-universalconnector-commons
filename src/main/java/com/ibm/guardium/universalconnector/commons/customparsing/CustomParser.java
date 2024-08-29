@@ -21,13 +21,13 @@ import java.util.regex.Pattern;
 import static com.ibm.guardium.universalconnector.commons.customparsing.PropertyConstant.*;
 
 public abstract class CustomParser {
+    protected static final RegexExecutor executor = new RegexExecutor();
     private static final Logger logger = LogManager.getLogger(CustomParser.class);
-    private static final RegexExecutor executor = new RegexExecutor();
-    static InetAddressValidator inetAddressValidator = InetAddressValidator.getInstance();
+    protected static InetAddressValidator inetAddressValidator = InetAddressValidator.getInstance();
     protected Map<String, String> properties;
     ObjectMapper mapper;
 
-    public CustomParser() {
+    CustomParser() {
     }
 
     public Record parseRecord(String payload) {
@@ -55,7 +55,7 @@ public abstract class CustomParser {
 
     protected void setSessionId(Record record, String payload) {
         String sessionId = parse(payload, properties.get(SESSION_ID));
-        if ( sessionId != null)
+        if (sessionId != null)
             record.setSessionId(sessionId);
         else
             record.setSessionId(DEFAULT_STRING);
@@ -135,7 +135,7 @@ public abstract class CustomParser {
 
     protected HashMap<String, String> readJsonFileAsJson(String fileName) throws IOException {
         String content = new String(Files.readAllBytes(Paths.get(fileName)));
-        return (HashMap<String, String>)(new ObjectMapper()).readValue(content, HashMap.class);
+        return (HashMap<String, String>) (new ObjectMapper()).readValue(content, HashMap.class);
     }
 
 }
