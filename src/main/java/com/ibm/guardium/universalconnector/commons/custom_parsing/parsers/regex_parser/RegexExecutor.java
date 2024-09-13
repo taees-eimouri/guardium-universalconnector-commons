@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
  * bail.
  */
 public class RegexExecutor {
-    private static final long DEFAULT_TIMEOUT_MICRO = 1000;
+    static final long DEFAULT_TIMEOUT_MICRO = 1000;
     private static final boolean DEFAULT_TIMING = true;
 
     private static final Logger logger = LogManager.getLogger(RegexExecutor.class);
