@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.ibm.guardium.universalconnector.commons.custom_parsing.PropertyConstant.*;
+import static com.ibm.guardium.universalconnector.commons.structures.Accessor.DATA_TYPE_GUARDIUM_SHOULD_NOT_PARSE_SQL;
+import static com.ibm.guardium.universalconnector.commons.structures.Accessor.DATA_TYPE_GUARDIUM_SHOULD_PARSE_SQL;
 import static com.ibm.guardium.universalconnector.commons.structures.SessionLocator.PORT_DEFAULT;
 
 public abstract class CustomParser {
@@ -24,6 +26,8 @@ public abstract class CustomParser {
     protected Map<String, String> properties;
     private final ObjectMapper mapper;
     private final IParser parser;
+    private boolean parseUsingSniffer = false;
+    private boolean hasSqlParsing = false;
 
     public CustomParser(ParserFactory.ParserType parserType) {
         parser = new ParserFactory().getParser(parserType);
@@ -32,7 +36,11 @@ public abstract class CustomParser {
 
     public Record parseRecord(String payload) {
         properties = getProperties();
-        if (properties == null || payload == null) return null;
+
+        if (!isValid(payload)) return null;
+
+        hasSqlParsing = SqlParser.hasSqlParsing(properties);
+        parseUsingSniffer = hasSqlParsing && SqlParser.isSnifferParsing(payload);
 
         return extractRecord(payload);
     }
@@ -62,7 +70,6 @@ public abstract class CustomParser {
     protected String parse(String payload, String key) {
         return parser.parse(payload, key);
     }
-
 
     // method to handle exception type and description
     protected ExceptionRecord getException(String payload, String sqlString) {
@@ -103,32 +110,29 @@ public abstract class CustomParser {
         return value != null ? value : DEFAULT_IP;
     }
 
-    protected Data getData(String payload, String sqlString) {
-        String sqlParsingActive = getValue(payload, SQL_PARSING_ACTIVE);
-        if (!Boolean.parseBoolean(sqlParsingActive)) return null;
-
+    protected Data getDataForException(String sqlString) {
         Data data = new Data();
+        data.setOriginalSqlCommand(sqlString);
+        return data;
+    }
 
-        String snifferParser = getValue(payload, SNIFFER_PARSER);
-        String object = getValue(payload, OBJECT);
-        String verb = getValue(payload, VERB);
-
-        if (snifferParser != null) {
-            //Do something here
-        } else if (verb != null) {
-            Construct construct = new Construct();
-            Sentence sentence = new Sentence(verb);
-            if (object != null) {
-                SentenceObject sentenceObject = new SentenceObject(object);
-                sentence.getObjects().add(sentenceObject);
-            }
-            construct.sentences.add(sentence);
-            construct.setFullSql(sqlString);
-        } else {
-            // Invalid data
-            return null;
+    protected Data getData(String payload, String sqlString) {
+        Data data = new Data();
+        if (!hasSqlParsing || parseUsingSniffer) {
+            return data;
         }
 
+        //If it reaches out this point it is a regex parsing and object and verb are not null
+        String object = getValue(payload, OBJECT);
+        String verb = getValue(payload, VERB);
+        Construct construct = new Construct();
+        Sentence sentence = new Sentence(verb);
+        SentenceObject sentenceObject = new SentenceObject(object);
+        sentence.getObjects().add(sentenceObject);
+        construct.sentences.add(sentence);
+        construct.setFullSql(sqlString);
+
+        data.setConstruct(construct);
         data.setOriginalSqlCommand(getOriginalSqlCommand(payload));
         return data;
     }
@@ -269,11 +273,6 @@ public abstract class CustomParser {
         return value != null ? value : DEFAULT_STRING;
     }
 
-    protected String getServerType(String payload) {
-        String value = getValue(payload, SERVER_TYPE);
-        return value != null ? value : DEFAULT_STRING;
-    }
-
     protected String getServerOs(String payload) {
         String value = getValue(payload, SERVER_OS);
         return value != null ? value : DEFAULT_STRING;
@@ -324,12 +323,28 @@ public abstract class CustomParser {
         return value != null ? value : DEFAULT_STRING;
     }
 
+    protected String getServerType(String payload) {
+        //this has been validated before
+        if (parseUsingSniffer)
+            return SqlParser.getServerType(properties.get(SNIFFER_PARSER));
+
+        String value = getValue(payload, SERVER_TYPE);
+        return value != null ? value : DEFAULT_STRING;
+    }
+
     protected String getLanguage(String payload) {
+        //this has been validated before
+        if (parseUsingSniffer)
+            return properties.get(SNIFFER_PARSER);
+
         return Accessor.LANGUAGE_FREE_TEXT_STRING;
     }
 
     protected String getDataType(String payload) {
-        return Accessor.DATA_TYPE_GUARDIUM_SHOULD_NOT_PARSE_SQL;
+        if (parseUsingSniffer)
+            return properties.get(DATA_TYPE_GUARDIUM_SHOULD_PARSE_SQL);
+
+        return DATA_TYPE_GUARDIUM_SHOULD_NOT_PARSE_SQL;
     }
 
     protected String getSessionId(String payload) {
@@ -371,5 +386,25 @@ public abstract class CustomParser {
                 logger.debug(fieldName + " " + value + "is not a valid integer.");
         }
         return null;
+    }
+
+    protected boolean isValid(String payload) {
+        if (properties == null) {
+            logger.error("The provided config file is invalid.");
+            return false;
+        }
+
+        if (payload == null) {
+            logger.error("The provided payload is null.");
+            return false;
+        }
+
+        SqlParser.ValidityCase isValid = SqlParser.isValid(properties);
+        if (!isValid.equals(SqlParser.ValidityCase.VALID)) {
+            logger.error(isValid.getDescription());
+            return false;
+        }
+
+        return true;
     }
 }
