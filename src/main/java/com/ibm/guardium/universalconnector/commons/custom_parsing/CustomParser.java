@@ -26,8 +26,8 @@ public abstract class CustomParser {
     protected Map<String, String> properties;
     private final ObjectMapper mapper;
     private final IParser parser;
-    private boolean parseUsingSniffer = false;
-    private boolean hasSqlParsing = false;
+    boolean parseUsingSniffer = false;
+    boolean hasSqlParsing = false;
 
     public CustomParser(ParserFactory.ParserType parserType) {
         parser = new ParserFactory().getParser(parserType);
@@ -37,7 +37,8 @@ public abstract class CustomParser {
     public Record parseRecord(String payload) {
         properties = getProperties();
 
-        if (!isValid(payload)) return null;
+        if (!isValid(payload))
+            return null;
 
         hasSqlParsing = SqlParser.hasSqlParsing(properties);
         parseUsingSniffer = hasSqlParsing && SqlParser.isSnifferParsing(payload);
@@ -73,8 +74,9 @@ public abstract class CustomParser {
 
     // method to handle exception type and description
     protected ExceptionRecord getException(String payload, String sqlString) {
-        String exceptionTypeId = getExceptionTypeId(payload);  // Get the error message
-        if (exceptionTypeId.isEmpty()) return null;
+        String exceptionTypeId = getExceptionTypeId(payload); // Get the error message
+        if (exceptionTypeId.isEmpty())
+            return null;
 
         ExceptionRecord exceptionRecord = new ExceptionRecord();
         exceptionRecord.setExceptionTypeId(exceptionTypeId);
@@ -98,12 +100,10 @@ public abstract class CustomParser {
         return value != null ? value : DEFAULT_STRING;
     }
 
-
     protected String getClientIpv6(String payload) {
         String value = getValue(payload, CLIENT_IPV6);
         return value != null ? value : DEFAULT_IPV6;
     }
-
 
     protected String getClientIp(String payload) {
         String value = getValue(payload, CLIENT_IP);
@@ -117,12 +117,13 @@ public abstract class CustomParser {
     }
 
     protected Data getData(String payload, String sqlString) {
-        Data data = new Data();
         if (!hasSqlParsing || parseUsingSniffer) {
-            return data;
+            return null;
         }
 
-        //If it reaches out this point it is a regex parsing and object and verb are not null
+        Data data = new Data();
+        // If it reaches out this point it is a regex parsing and object and verb are
+        // not null
         String object = getValue(payload, OBJECT);
         String verb = getValue(payload, VERB);
         Construct construct = new Construct();
@@ -136,7 +137,6 @@ public abstract class CustomParser {
         data.setOriginalSqlCommand(getOriginalSqlCommand(payload));
         return data;
     }
-
 
     protected Boolean isIpv6(String payload) {
         String value = getValue(payload, IS_IPV6);
@@ -168,14 +168,15 @@ public abstract class CustomParser {
         return value != null ? value : DEFAULT_IPV6;
     }
 
-
     // method to handle the SQL command that caused the exception
     protected String getSqlString(String payload) {
         String value = getValue(payload, SQL_STRING);
-        return value != null ? value : DEFAULT_STRING;  // Set the SQL command that caused the exception
+        return value != null ? value : DEFAULT_STRING; // Set the SQL command that caused the exception
     }
 
-    // In this setTimestamp method now parses the timestamp from the payload and sets the timestamp, minOffsetFromGMT, and minDst fields in the Time object of the Record. If the timestamp is not available, it sets default values.
+    // In this setTimestamp method now parses the timestamp from the payload and
+    // sets the timestamp, minOffsetFromGMT, and minDst fields in the Time object of
+    // the Record. If the timestamp is not available, it sets default values.
     protected Time getTimestamp(String payload) {
         String value = getValue(payload, TIMESTAMP);
         Time time;
@@ -190,7 +191,7 @@ public abstract class CustomParser {
     protected SessionLocator getSessionLocator(String payload, String sessionId) {
         SessionLocator sessionLocator = new SessionLocator();
 
-        //set default values
+        // set default values
         sessionLocator.setIpv6(false);
         sessionLocator.setClientIpv6(DEFAULT_IPV6);
         sessionLocator.setServerIpv6(DEFAULT_IPV6);
@@ -228,7 +229,8 @@ public abstract class CustomParser {
         return new Time(millis, minOffset, minDst);
     }
 
-    // Updated method to check accessor.dataType and populate original_sql_command or construct
+    // Updated method to check accessor.dataType and populate original_sql_command
+    // or construct
     protected Accessor getAccessor(String payload) {
         Accessor accessor = new Accessor();
 
@@ -261,7 +263,6 @@ public abstract class CustomParser {
         String value = getValue(payload, DB_USER);
         return value != null ? value : DATABASE_NOT_AVAILABLE;
     }
-
 
     protected String getDbName(String payload) {
         String value = getValue(payload, DB_NAME);
@@ -324,7 +325,7 @@ public abstract class CustomParser {
     }
 
     protected String getServerType(String payload) {
-        //this has been validated before
+        // this has been validated before
         if (parseUsingSniffer)
             return SqlParser.getServerType(properties.get(SNIFFER_PARSER));
 
@@ -333,7 +334,7 @@ public abstract class CustomParser {
     }
 
     protected String getLanguage(String payload) {
-        //this has been validated before
+        // this has been validated before
         if (parseUsingSniffer)
             return properties.get(SNIFFER_PARSER);
 
@@ -353,14 +354,16 @@ public abstract class CustomParser {
     }
 
     protected Integer getClientPort(String sessionId, String payload) {
-        if (sessionId.isEmpty()) return PORT_DEFAULT;
+        if (sessionId.isEmpty())
+            return PORT_DEFAULT;
 
         Integer value = convertToInt(CLIENT_PORT, getValue(payload, CLIENT_PORT));
         return value != null ? value : PORT_DEFAULT;
     }
 
     protected Integer getServerPort(String sessionId, String payload) {
-        if (sessionId.isEmpty()) return PORT_DEFAULT;
+        if (sessionId.isEmpty())
+            return PORT_DEFAULT;
 
         Integer value = convertToInt(SERVER_PORT, getValue(payload, SERVER_PORT));
         return value != null ? value : PORT_DEFAULT;

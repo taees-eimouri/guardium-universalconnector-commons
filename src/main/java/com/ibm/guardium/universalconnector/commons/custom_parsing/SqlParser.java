@@ -42,11 +42,12 @@ public class SqlParser {
 
     public static ValidityCase isValid(Map<String, String> properties) {
         boolean active = hasSqlParsing(properties);
-        if (!active) return ValidityCase.VALID;
-
+        if (!active)
+            return ValidityCase.VALID;
 
         String parsingType = properties.get(PARSING_TYPE);
-        if (parsingType == null || !validParsers.contains(parsingType)) return ValidityCase.INVALID_PARSING_TYPE;
+        if (parsingType == null || !validParsers.contains(parsingType))
+            return ValidityCase.INVALID_PARSING_TYPE;
 
         if (isSnifferParsing(parsingType)) {
             String snifferParser = properties.get(SNIFFER_PARSER);
@@ -54,11 +55,11 @@ public class SqlParser {
                 return ValidityCase.INVALID_SNIFFER_PARSER;
         } else {
             String object = properties.get(OBJECT);
-            if (object == null)
+            if (object == null || object.isEmpty())
                 return ValidityCase.NULL_OBJECT;
 
             String verb = properties.get(VERB);
-            if (verb == null)
+            if (verb == null || object.isEmpty())
                 return ValidityCase.NULL_VERB;
         }
 
@@ -72,7 +73,6 @@ public class SqlParser {
     public static boolean isSnifferParsing(String parsingType) {
         return parsingType.equalsIgnoreCase("SNIFFER");
     }
-
 
     public enum ValidityCase {
         VALID("The SQL Parsing is valid"),
