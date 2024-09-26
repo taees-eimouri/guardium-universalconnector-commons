@@ -23,7 +23,7 @@ import static com.ibm.guardium.universalconnector.commons.structures.SessionLoca
 public abstract class CustomParser {
     private static final Logger logger = LogManager.getLogger(CustomParser.class);
     private static final InetAddressValidator inetAddressValidator = InetAddressValidator.getInstance();
-    protected Map<String, String> properties;
+    protected Map<String, Object> properties;
     private final ObjectMapper mapper;
     private final IParser parser;
     boolean parseUsingSniffer = false;
@@ -65,7 +65,7 @@ public abstract class CustomParser {
     }
 
     protected String getValue(String payload, String fieldName) {
-        return parse(payload, properties.get(fieldName));
+        return parse(payload, (String) properties.get(fieldName));
     }
 
     protected String parse(String payload, String key) {
@@ -327,7 +327,7 @@ public abstract class CustomParser {
     protected String getServerType(String payload) {
         // this has been validated before
         if (parseUsingSniffer)
-            return SqlParser.getServerType(properties.get(SNIFFER_PARSER));
+            return SqlParser.getServerType((String) properties.get(SNIFFER_PARSER));
 
         String value = getValue(payload, SERVER_TYPE);
         return value != null ? value : DEFAULT_STRING;
@@ -336,14 +336,14 @@ public abstract class CustomParser {
     protected String getLanguage(String payload) {
         // this has been validated before
         if (parseUsingSniffer)
-            return properties.get(SNIFFER_PARSER);
+            return (String) properties.get(SNIFFER_PARSER);
 
         return Accessor.LANGUAGE_FREE_TEXT_STRING;
     }
 
     protected String getDataType(String payload) {
         if (parseUsingSniffer)
-            return properties.get(DATA_TYPE_GUARDIUM_SHOULD_PARSE_SQL);
+            return (String) properties.get(DATA_TYPE_GUARDIUM_SHOULD_PARSE_SQL);
 
         return DATA_TYPE_GUARDIUM_SHOULD_NOT_PARSE_SQL;
     }
@@ -371,7 +371,7 @@ public abstract class CustomParser {
 
     public abstract String getConfigFilePath();
 
-    public Map<String, String> getProperties() {
+    public Map<String, Object> getProperties() {
         try {
             String content = new String(Files.readAllBytes(Paths.get(getConfigFilePath())));
             return mapper.readValue(content, HashMap.class);
