@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
 public class CustomParserTest {
 
     private static CustomParser customParser;
-    private static Map<String, Object> configValues;
+    private static Map<String, String> configValues;
 
     @Mock
     private InetAddressValidator inetAddressValidator;
@@ -76,7 +76,7 @@ public class CustomParserTest {
 
     @Test
     public void testGetProperties() {
-        Map<String, Object> properties = customParser.getProperties();
+        Map<String, String> properties = customParser.getProperties();
         assertNotNull(properties);
         assertEquals(configValues.get(PropertyConstant.SESSION_ID), properties.get(PropertyConstant.SESSION_ID));
     }
@@ -249,8 +249,8 @@ public class CustomParserTest {
     public void testIsValid() {
 
         // Test case 1: Valid properties
-        Map<String, Object> validProperties = new HashMap<>();
-        validProperties.put(SQL_PARSING_ACTIVE, true);
+        Map<String, String> validProperties = new HashMap<>();
+        validProperties.put(SQL_PARSING_ACTIVE, "true");
         validProperties.put(PARSING_TYPE, "REGEX");
         validProperties.put(OBJECT, "table");
         validProperties.put(VERB, "SELECT");
@@ -273,7 +273,7 @@ public class CustomParserTest {
         assertFalse("Expected isValid to return false for missing verb", customParser.isValid("some payload"));
 
         // Test case 5: SQL parsing inactive
-        validProperties.put(SQL_PARSING_ACTIVE, false);
+        validProperties.put(SQL_PARSING_ACTIVE, "false");
         assertTrue("Expected isValid to return true when SQL parsing is inactive",
                 customParser.isValid("some payload"));
 
@@ -289,13 +289,13 @@ public class CustomParserTest {
     @Test
     public void testIsValidAndRelatedMethods() {
         // Test hasSqlParsing when SQL parsing is not active
-        Map<String, Object> properties = new HashMap<>();
-        properties.put(SQL_PARSING_ACTIVE, false);
+        Map<String, String> properties = new HashMap<>();
+        properties.put(SQL_PARSING_ACTIVE, "false");
         assertFalse(SqlParser.hasSqlParsing(properties));
         assertEquals(SqlParser.ValidityCase.VALID, SqlParser.isValid(properties));
 
         // Test hasSqlParsing when SQL parsing is active
-        properties.put(SQL_PARSING_ACTIVE, true);
+        properties.put(SQL_PARSING_ACTIVE, "true");
         assertTrue(SqlParser.hasSqlParsing(properties));
 
         // Test isValid with invalid parsing type
@@ -347,7 +347,7 @@ public class CustomParserTest {
 
     @Test
     public void testGetServerTypeUsingSniffer() {
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         properties.put(SNIFFER_PARSER, "MYSQL");
         customParser.properties = properties;
         customParser.parseUsingSniffer = true;
@@ -358,7 +358,7 @@ public class CustomParserTest {
 
     @Test
     public void testGetDataTypeUsingSniffer() {
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         properties.put(DATA_TYPE_GUARDIUM_SHOULD_PARSE_SQL, "TEXT");
         customParser.properties = properties;
         customParser.parseUsingSniffer = true;

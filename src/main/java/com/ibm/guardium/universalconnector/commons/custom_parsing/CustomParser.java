@@ -23,7 +23,7 @@ import static com.ibm.guardium.universalconnector.commons.structures.SessionLoca
 public abstract class CustomParser {
     private static final Logger logger = LogManager.getLogger(CustomParser.class);
     private static final InetAddressValidator inetAddressValidator = InetAddressValidator.getInstance();
-    protected Map<String, Object> properties;
+    protected Map<String, String> properties;
     private final ObjectMapper mapper;
     private final IParser parser;
     boolean parseUsingSniffer = false;
@@ -65,7 +65,7 @@ public abstract class CustomParser {
     }
 
     protected String getValue(String payload, String fieldName) {
-        return parse(payload, (String) properties.get(fieldName));
+        return parse(payload, properties.get(fieldName));
     }
 
     protected String parse(String payload, String key) {
@@ -371,7 +371,7 @@ public abstract class CustomParser {
 
     public abstract String getConfigFilePath();
 
-    public Map<String, Object> getProperties() {
+    public Map<String, String> getProperties() {
         try {
             String content = new String(Files.readAllBytes(Paths.get(getConfigFilePath())));
             return mapper.readValue(content, HashMap.class);
@@ -386,7 +386,7 @@ public abstract class CustomParser {
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {
             if (logger.isDebugEnabled())
-                logger.debug(fieldName + " " + value + "is not a valid integer.");
+                logger.debug("{} {}is not a valid integer.", fieldName, value);
         }
         return null;
     }

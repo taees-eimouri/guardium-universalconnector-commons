@@ -40,25 +40,25 @@ public class SqlParser {
         return validSnifferParsers.get(language);
     }
 
-    public static ValidityCase isValid(Map<String, Object> properties) {
+    public static ValidityCase isValid(Map<String, String> properties) {
         boolean active = hasSqlParsing(properties);
         if (!active)
             return ValidityCase.VALID;
 
-        String parsingType = (String) properties.get(PARSING_TYPE);
+        String parsingType = properties.get(PARSING_TYPE);
         if (parsingType == null || !validParsers.contains(parsingType))
             return ValidityCase.INVALID_PARSING_TYPE;
 
         if (isSnifferParsing(parsingType)) {
-            String snifferParser = (String) properties.get(SNIFFER_PARSER);
+            String snifferParser = properties.get(SNIFFER_PARSER);
             if (snifferParser == null || !validSnifferParsers.containsKey(snifferParser))
                 return ValidityCase.INVALID_SNIFFER_PARSER;
         } else {
-            String object = (String) properties.get(OBJECT);
+            String object = properties.get(OBJECT);
             if (object == null || object.isEmpty())
                 return ValidityCase.NULL_OBJECT;
 
-            String verb = (String) properties.get(VERB);
+            String verb = properties.get(VERB);
             if (verb == null || verb.isEmpty())
                 return ValidityCase.NULL_VERB;
         }
@@ -66,8 +66,8 @@ public class SqlParser {
         return ValidityCase.VALID;
     }
 
-    public static boolean hasSqlParsing(Map<String, Object> properties) {
-        return Boolean.TRUE.equals(properties.get(SQL_PARSING_ACTIVE));
+    public static boolean hasSqlParsing(Map<String, String> properties) {
+        return Boolean.parseBoolean(properties.get(SQL_PARSING_ACTIVE));
     }
 
     public static boolean isSnifferParsing(String parsingType) {
