@@ -3,6 +3,8 @@ package com.ibm.guardium.universalconnector.commons.custom_parsing;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ibm.guardium.universalconnector.commons.structures.*;
 import org.apache.commons.validator.routines.InetAddressValidator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -15,8 +17,11 @@ import java.util.Map;
 import static com.ibm.guardium.universalconnector.commons.custom_parsing.PropertyConstant.*;
 import static com.ibm.guardium.universalconnector.commons.structures.Accessor.DATA_TYPE_GUARDIUM_SHOULD_PARSE_SQL;
 import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class CustomParserTest {
+    private static final Logger logger = LogManager.getLogger(CustomParserTest.class);
 
     private static CustomParser customParser;
     private static Map<String, String> configValues;
@@ -79,6 +84,24 @@ public class CustomParserTest {
         Map<String, String> properties = customParser.getProperties();
         assertNotNull(properties);
         assertEquals(configValues.get(PropertyConstant.SESSION_ID), properties.get(PropertyConstant.SESSION_ID));
+    }
+
+    @Test
+    public void testGetStaticValue() {
+        Map<String, String> props = new HashMap<>();
+        props.put(PropertyConstant.DB_USER, "{TEST}");
+        CustomParser cp = new CustomParser(ParserFactory.ParserType.regex) {
+            @Override
+            public String getConfigFilePath() {
+                return "";
+            }
+            @Override
+            public Map<String, String> getProperties() {
+                return props;
+            }
+        };
+        cp.properties = props;
+        assertEquals("TEST", cp.getValue("whatever", PropertyConstant.DB_USER));
     }
 
     @Test
